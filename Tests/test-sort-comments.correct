@@ -1,0 +1,40 @@
+0
+/**
+ * Method A
+ */
+A
+/** Method B */
+B
+/* Method C */
+C
+// Method D
+D
+/// Method E
+E
+# Bash Method F
+F
+/** Method G
+ */
+G
+<!--
+    HTML method?
+-->
+H
+<!-- Inline HTML method? -->
+I
+# Bash Method J C3
+# Bash Method J C2
+# Bash Method J C1
+# Bash Method J C5
+# Bash Method J C4
+J
+@annotation B
+@annotation A
+a
+/**
+ * Header
+ * Body
+ * Param
+ * return
+ */
+method
