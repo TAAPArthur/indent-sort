@@ -1,0 +1,10 @@
+/**
+ * If the WM_SELECTION is owned by another client, take it anyways
+ */
+extern bool STEAL_WM_SELECTION;
+
+/**
+ * If true then when we manually set focus, we will update our state
+ * immediately instead of waiting for the async focus notification event.
+*/
+extern bool SYNC_FOCUS;

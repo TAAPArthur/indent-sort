@@ -6,7 +6,7 @@ comma = True
 debug = False
 # debug = True
 
-endingBlockRegex = re.compile(r"^\s*([\[\]\{\},;]|</|-->)+\s*")
+endingBlockRegex = re.compile(r"^\s*([\[\]\{\},;]|</|-->|\*/)+\s*")
 startingBlockRegex = re.compile(r'^\s*(#|/\*|//|/\*|<!--|@).*')
 
 
@@ -15,6 +15,7 @@ def getInput():
     for line in sys.stdin:
         yield line
     yield None
+
 
 sortMinLevel = -1
 sortMaxLevel = float("inf")
@@ -99,11 +100,11 @@ class Block:
             for k in kid:
                 yield k
 
-    def addToDeepest(self,line):
+    def addToDeepest(self, line):
         if self.children:
             self.children[-1].addToDeepest(line)
         else:
-            self+=line
+            self += line
 
     def process(self, line, indentLevel):
         if self.done:
@@ -148,5 +149,6 @@ def indentSort():
         root.process(line, indentLevel)
     return root
 
-root=indentSort()
+
+root = indentSort()
 print(root, end="")
