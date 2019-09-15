@@ -99,6 +99,12 @@ class Block:
             for k in kid:
                 yield k
 
+    def addToDeepest(self,line):
+        if self.children:
+            self.children[-1].addToDeepest(line)
+        else:
+            self+=line
+
     def process(self, line, indentLevel):
         if self.done:
             return True
@@ -133,6 +139,9 @@ def indentSort():
             trimmedLine = line.lstrip()
             indentLevel = len(line) - len(
                 trimmedLine) if trimmedLine else lastLevel
+            if not trimmedLine:
+                root.addToDeepest(line)
+                continue
         else:
             indentLevel = -1
         lastLevel = indentLevel
