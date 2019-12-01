@@ -7,11 +7,10 @@ debug = False
 # debug = True
 
 endingBlockRegex = re.compile(r"^\s*([\[\]\{\},;]|</|-->|\*/)+\s*")
-startingBlockRegex = re.compile(r'^\s*(#|/\*|//|/\*|<!--|@).*')
+startingBlockRegex = re.compile(r'^\s*(\n|#|/\*|//|/\*|<!--|@|template).*')
 
 
 def getInput():
-
     for line in sys.stdin:
         yield line
     yield None
@@ -100,12 +99,6 @@ class Block:
             for k in kid:
                 yield k
 
-    def addToDeepest(self, line):
-        if self.children:
-            self.children[-1].addToDeepest(line)
-        else:
-            self += line
-
     def process(self, line, indentLevel):
         if self.done:
             return True
@@ -120,12 +113,12 @@ class Block:
                     if endingBlockRegex.match(line):
                         self.children[-1].footer += line
                         return False
-                    elif self.children:
-                        if self.children[-1].isHeader:
-                            header = str(self.children.pop())
-                            self.children.append(
-                                Block(line, indentLevel, self.nestedLevel + 1, header=header))
-                            return False
+                if self.children:
+                    if self.children[-1].isHeader:
+                        header = str(self.children.pop())
+                        self.children.append(
+                            Block(line, indentLevel, self.nestedLevel + 1, header=header))
+                        return False
                 self.children.append(
                     Block(line, indentLevel, self.nestedLevel + 1))
                 assert(self.children[-1])
@@ -141,11 +134,11 @@ def indentSort():
             indentLevel = len(line) - len(
                 trimmedLine) if trimmedLine else lastLevel
             if not trimmedLine:
-                root.addToDeepest(line)
-                continue
+                indentLevel = lastLevel + 1
+            else:
+                lastLevel = indentLevel
         else:
             indentLevel = -1
-        lastLevel = indentLevel
         root.process(line, indentLevel)
     return root
 

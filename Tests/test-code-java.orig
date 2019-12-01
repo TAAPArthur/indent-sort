@@ -1,0 +1,27 @@
+@A
+class A {
+    @b
+    public void b() {
+    }
+    @a
+    public void a() {
+    }
+}
+@A
+class C {
+    @b
+    public void b() {
+    }
+    @a
+    public void a() {
+    }
+}
+@B
+class B {
+    @a
+    public void b() {
+    }
+    @a
+    public void a() {
+    }
+}
