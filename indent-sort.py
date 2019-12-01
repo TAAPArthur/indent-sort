@@ -16,9 +16,23 @@ def getInput():
     yield None
 
 
+helpStr = """
+Usage: indent-sort [[min]-[max]]
+
+Examples
+cat file | indent-sort 0        # sort non-indented lines
+cat file.xml | indent-sort        # sort entire file
+"""
+
 sortMinLevel = -1
 sortMaxLevel = float("inf")
 if len(sys.argv) > 1:
+    if sys.argv[1] == "--help" or sys.argv[1] == "-h":
+        print(helpStr)
+        sys.exit(0)
+    if sys.argv[1] == "--version" or sys.argv[1] == "-v":
+        print("1.0")
+        sys.exit(0)
     parts = sys.argv[1].split("-")
     if parts:
         if len(parts) == 1:

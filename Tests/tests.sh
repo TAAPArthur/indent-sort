@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 
+../indent-sort.py -h >/dev/null
+../indent-sort.py --help >/dev/null
+../indent-sort.py -v >/dev/null
+../indent-sort.py --version >/dev/null
 while read file; do
     base=$(basename $file .correct)
     original=$base.orig
