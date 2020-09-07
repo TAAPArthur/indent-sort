@@ -35,8 +35,10 @@ KEY_SPLIT = None
 parser = argparse.ArgumentParser()
 parser.add_argument("-v", "--version", action="version", version="1.1")
 parser.add_argument("-m", "--ignore-modifiers", default=False, action="store_const", const=True)
+parser.add_argument("-k", "--key", default=None, type=int, help="Skip the first N words when sorting")
 parser.add_argument("range", default=None, nargs="?")
 namespace = parser.parse_args()
+KEY_SPLIT = namespace.key
 IGNORE_MODIFIERS = namespace.ignore_modifiers
 if namespace.range:
     parts = namespace.range.split("-")
@@ -53,6 +55,8 @@ if namespace.range:
 def getSortKey(key):
     if IGNORE_MODIFIERS:
         key = modifiersRegex.sub("", key)
+    if KEY_SPLIT:
+        key = key.split()[KEY_SPLIT:]
     return key
 
 

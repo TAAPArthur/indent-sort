@@ -1,0 +1,22 @@
+#!-m -k 1
+public class A(){
+    public int method1();
+    private void method2();
+    String method3();
+    public static CustomClass method4();
+    static void method5();
+    float method6(Param param1);
+    double method6(Param param2);
+    abstract void method7();
+}
+static abstract class B() {
+    public void method1();
+    private void method2();
+    void method3();
+    public static void method4();
+    static void method5();
+    void method6(Param param1);
+    void method6(Param param2);
+    abstract void method7();
+}
+private interface C() {}
