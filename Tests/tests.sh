@@ -8,8 +8,12 @@ set -e
 while read file; do
     base=$(basename $file .correct)
     original=$base.orig
-    echo "Test: $base"
-    param=$(echo $base | grep -Po "partial-sort\K.*" || true)
+    cmd=$(head -n1 $original)
+    if [ "${cmd::2}" == "#!" ]; then
+        param="${cmd:2}"
+    else
+        param=$(echo $base | grep -Po "partial-sort\K.*" || true)
+    fi
     if ! diff --strip-trailing-cr -q --label "computed" <(cat $original | ../indent-sort.py $param) $file; then
         echo "Param: '$param'"
         cat $original | ../indent-sort.py $param> $base.wrong

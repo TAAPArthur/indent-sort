@@ -9,6 +9,8 @@ debug = False
 endingBlockRegex = re.compile(r"^\s*([\[\]\{\},;]|</|-->|\*/)+\s*")
 startingBlockRegex = re.compile(r'^\s*(\n|#|/\*|//|/\*|<!--|@|template).*')
 
+modifiersRegex = re.compile(r"(public|static|abstract|private|final|const)\s*")
+
 
 def getInput():
     for line in sys.stdin:
@@ -26,6 +28,9 @@ cat file.xml | indent-sort        # sort entire file
 
 sortMinLevel = -1
 sortMaxLevel = float("inf")
+IGNORE_MODIFIERS = False
+
+
 if len(sys.argv) > 1:
     if sys.argv[1] == "--help" or sys.argv[1] == "-h":
         print(helpStr)
@@ -33,21 +38,26 @@ if len(sys.argv) > 1:
     if sys.argv[1] == "--version" or sys.argv[1] == "-v":
         print("1.0")
         sys.exit(0)
-    parts = sys.argv[1].split("-")
-    if parts:
-        if len(parts) == 1:
-            sortMinLevel = sortMaxLevel = int(parts[0])
+    for arg in sys.argv[1:]:
+        if arg == "--ignore-modifiers" or arg == "-m":
+            IGNORE_MODIFIERS = True
         else:
-            if parts[0]:
-                sortMinLevel = int(parts[0])
-            if parts[1]:
-                sortMaxLevel = int(parts[1])
+            parts = arg.split("-")
+            if parts:
+                if len(parts) == 1:
+                    sortMinLevel = sortMaxLevel = int(parts[0])
+                else:
+                    if parts[0]:
+                        sortMinLevel = int(parts[0])
+                    if parts[1]:
+                        sortMaxLevel = int(parts[1])
 
 
 class Block:
 
     def __init__(self, codeBlock, indentLevel, nestedLevel, header=""):
         self.codeBlock = codeBlock
+        self.sortKey = codeBlock if not IGNORE_MODIFIERS else modifiersRegex.sub("", codeBlock)
         self.indentLevel = indentLevel
         self.nestedLevel = nestedLevel
         self.children = []
@@ -57,7 +67,7 @@ class Block:
         self.footer = ""
 
     def __lt__(self, other):
-        return self.codeBlock < other.codeBlock
+        return self.sortKey < other.sortKey
 
     def __iadd__(self, value):
         self.codeBlock += value

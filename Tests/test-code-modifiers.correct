@@ -1,0 +1,22 @@
+#!--ignore-modifiers
+public class A(){
+    public void method1();
+    private void method2();
+    void method3();
+    public static void method4();
+    static void method5();
+    void method6(Param param1);
+    void method6(Param param2);
+    abstract void method7();
+}
+static class B() {
+    public void method1();
+    private void method2();
+    void method3();
+    public static void method4();
+    static void method5();
+    void method6(Param param1);
+    void method6(Param param2);
+    abstract void method7();
+}
+private class C() {}
