@@ -142,7 +142,10 @@ class Block:
 def indentSort():
     root = Block("", -1, -1)
     lastLevel = -1
-    for line in getInput():
+    for i, line in enumerate(getInput()):
+        if i == 0 and line.startswith("#!"):
+            root = Block(line, -1, -1)
+            continue
         if line != None:
             trimmedLine = line.lstrip()
             indentLevel = len(line) - len(
