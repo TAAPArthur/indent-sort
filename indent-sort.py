@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import sys
 import re
+import argparse
 
 comma = True
 debug = False
@@ -29,35 +30,37 @@ cat file.xml | indent-sort        # sort entire file
 sortMinLevel = -1
 sortMaxLevel = float("inf")
 IGNORE_MODIFIERS = False
+KEY_SPLIT = None
 
-
-if len(sys.argv) > 1:
-    if sys.argv[1] == "--help" or sys.argv[1] == "-h":
-        print(helpStr)
-        sys.exit(0)
-    if sys.argv[1] == "--version" or sys.argv[1] == "-v":
-        print("1.0")
-        sys.exit(0)
-    for arg in sys.argv[1:]:
-        if arg == "--ignore-modifiers" or arg == "-m":
-            IGNORE_MODIFIERS = True
+parser = argparse.ArgumentParser()
+parser.add_argument("-v", "--version", action="version", version="1.1")
+parser.add_argument("-m", "--ignore-modifiers", default=False, action="store_const", const=True)
+parser.add_argument("range", default=None, nargs="?")
+namespace = parser.parse_args()
+IGNORE_MODIFIERS = namespace.ignore_modifiers
+if namespace.range:
+    parts = namespace.range.split("-")
+    if parts:
+        if len(parts) == 1:
+            sortMinLevel = sortMaxLevel = int(parts[0])
         else:
-            parts = arg.split("-")
-            if parts:
-                if len(parts) == 1:
-                    sortMinLevel = sortMaxLevel = int(parts[0])
-                else:
-                    if parts[0]:
-                        sortMinLevel = int(parts[0])
-                    if parts[1]:
-                        sortMaxLevel = int(parts[1])
+            if parts[0]:
+                sortMinLevel = int(parts[0])
+            if parts[1]:
+                sortMaxLevel = int(parts[1])
+
+
+def getSortKey(key):
+    if IGNORE_MODIFIERS:
+        key = modifiersRegex.sub("", key)
+    return key
 
 
 class Block:
 
     def __init__(self, codeBlock, indentLevel, nestedLevel, header=""):
         self.codeBlock = codeBlock
-        self.sortKey = codeBlock if not IGNORE_MODIFIERS else modifiersRegex.sub("", codeBlock)
+        self.sortKey = getSortKey(codeBlock)
         self.indentLevel = indentLevel
         self.nestedLevel = nestedLevel
         self.children = []
