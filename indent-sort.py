@@ -3,7 +3,6 @@ import sys
 import re
 import argparse
 
-comma = True
 debug = False
 # debug = True
 
@@ -11,6 +10,7 @@ endingBlockRegex = re.compile(r"^\s*([\[\]\{\},;]|</|-->|\*/)+\s*")
 startingBlockRegex = re.compile(r'^\s*(\n|#|/\*|//|/\*|<!--|@|template).*')
 
 modifiersRegex = re.compile(r"(public|static|abstract|private|final|const)\s*")
+continuationRegex = re.compile(r"((,| \\)\n)$")
 
 
 def getInput():
@@ -80,20 +80,14 @@ class Block:
         self.codeBlock += value
         return self
 
-    def endswith(self, s):
-        return self.footer.endswith(s) if self.footer else self.codeBlock.endswith(s)
+    def getEnd(self):
+        return self.footer if self.footer else self.codeBlock
 
-    def setTrailingComma(self, add):
-        if add:
-            if self.footer:
-                self.footer = self.footer[:-1] + ",\n"
-            else:
-                self.codeBlock = self.codeBlock[:-1] + ",\n"
+    def modifyLastEntry(self, replacement):
+        if self.footer:
+            self.footer = replacement(self.footer)
         else:
-            if self.footer:
-                self.footer = self.footer[:-2] + "\n"
-            else:
-                self.codeBlock = self.codeBlock[:-2] + "\n"
+            self.codeBlock = replacement(self.codeBlock)
 
     def finalize(self):
         if self.done:
@@ -105,13 +99,14 @@ class Block:
             kid.finalize()
         if sortMinLevel <= self.nestedLevel + 1 <= sortMaxLevel:
             assert(self.children[-1])
-            changeComma = False
-            if comma and not self.children[-1].endswith(",\n") and self.children[0].endswith(",\n"):
-                self.children[-1].setTrailingComma(1)
-                changeComma = 1
+            continuationChar = False
+            match = continuationRegex.search(self.children[0].getEnd())
+            if not continuationRegex.search(self.children[-1].getEnd()) and match:
+                self.children[-1].modifyLastEntry(lambda x : x.replace("\n", match.group(1)))
+                continuationChar = 1
             self.children.sort()
-            if comma and changeComma:
-                self.children[-1].setTrailingComma(0)
+            if continuationChar:
+                self.children[-1].modifyLastEntry(lambda x : continuationRegex.sub("\n", x))
             assert(self.children[-1])
 
     def __str__(self):
