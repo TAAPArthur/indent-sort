@@ -14,9 +14,7 @@ for file in *correct; do
         param="${base#test-partial-sort}"
         [ "$param" = "$base" ] && param=0-
     fi
-    if ! ../indent-sort.py $param  < "$original"| diff -q --label "computed" - "$file"; then
-        echo "Param: '$param'"
-        ../indent-sort.py "$param" < "$original" > "$base.wrong"
-        ../indent-sort.py "$param" < "$original" | diff -u - "$file"
+    if ! ../indent-sort.py $param  < "$original" | diff -u - "$file"; then
+        echo "Test $base failed; param: '$param'"
     fi
 done
