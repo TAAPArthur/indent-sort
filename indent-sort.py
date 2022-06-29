@@ -12,44 +12,10 @@ startingBlockRegex = re.compile(r'^\s*(\n|#|/\*|//|/\*|<!--|@|template).*')
 modifiersRegex = re.compile(r"(public|static|abstract|private|final|const)\s*")
 continuationRegex = re.compile(r"((,| \\)\n)$")
 
-
-def getInput():
-    for line in sys.stdin:
-        yield line
-    yield None
-
-
-helpStr = """
-Usage: indent-sort [[min]-[max]]
-
-Examples
-cat file | indent-sort 0        # sort non-indented lines
-cat file.xml | indent-sort        # sort entire file
-"""
-
 sortMinLevel = -1
 sortMaxLevel = float("inf")
 IGNORE_MODIFIERS = False
 KEY_SPLIT = None
-
-parser = argparse.ArgumentParser()
-parser.add_argument("-v", "--version", action="version", version="1.1")
-parser.add_argument("-m", "--ignore-modifiers", default=False, action="store_const", const=True)
-parser.add_argument("-k", "--key", default=None, type=int, help="Skip the first N words when sorting")
-parser.add_argument("range", default=None, nargs="?")
-namespace = parser.parse_args()
-KEY_SPLIT = namespace.key
-IGNORE_MODIFIERS = namespace.ignore_modifiers
-if namespace.range:
-    parts = namespace.range.split("-")
-    if parts:
-        if len(parts) == 1:
-            sortMinLevel = sortMaxLevel = int(parts[0])
-        else:
-            if parts[0]:
-                sortMinLevel = int(parts[0])
-            if parts[1]:
-                sortMaxLevel = int(parts[1])
 
 
 def getSortKey(key):
@@ -171,6 +137,39 @@ def indentSort():
         root.process(line, indentLevel)
     return root
 
+def getInput():
+    for line in sys.stdin:
+        yield line
+    yield None
 
-root = indentSort()
-print(root, end="")
+if __name__ == "__main__":
+    helpStr = """
+    Usage: indent-sort [[min]-[max]]
+
+    Examples
+    cat file | indent-sort 0        # sort non-indented lines
+    cat file.xml | indent-sort        # sort entire file
+    """
+
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-v", "--version", action="version", version="1.1")
+    parser.add_argument("-m", "--ignore-modifiers", default=False, action="store_const", const=True)
+    parser.add_argument("-k", "--key", default=None, type=int, help="Skip the first N words when sorting")
+    parser.add_argument("range", default=None, nargs="?")
+    namespace = parser.parse_args()
+    KEY_SPLIT = namespace.key
+    IGNORE_MODIFIERS = namespace.ignore_modifiers
+    if namespace.range:
+        parts = namespace.range.split("-")
+        if parts:
+            if len(parts) == 1:
+                sortMinLevel = sortMaxLevel = int(parts[0])
+            else:
+                if parts[0]:
+                    sortMinLevel = int(parts[0])
+                if parts[1]:
+                    sortMaxLevel = int(parts[1])
+
+    root = indentSort()
+    print(root, end="")
