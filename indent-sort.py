@@ -1,7 +1,7 @@
 #!/usr/bin/python3
-import sys
-import re
 import argparse
+import re
+import sys
 
 debug = False
 # debug = True
@@ -137,21 +137,14 @@ def indentSort():
         root.process(line, indentLevel)
     return root
 
+
 def getInput():
     for line in sys.stdin:
         yield line
     yield None
 
+
 if __name__ == "__main__":
-    helpStr = """
-    Usage: indent-sort [[min]-[max]]
-
-    Examples
-    cat file | indent-sort 0        # sort non-indented lines
-    cat file.xml | indent-sort        # sort entire file
-    """
-
-
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--version", action="version", version="1.1")
     parser.add_argument("-m", "--ignore-modifiers", default=False, action="store_const", const=True)
