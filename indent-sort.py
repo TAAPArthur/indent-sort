@@ -12,8 +12,6 @@ startingBlockRegex = re.compile(r'^\s*(\n|#|/\*|//|/\*|<!--|@|template).*')
 modifiersRegex = re.compile(r"(public|static|abstract|private|final|const)\s*")
 continuationRegex = re.compile(r"((,| \\)\n)$")
 
-sortMinLevel = -1
-sortMaxLevel = float("inf")
 IGNORE_MODIFIERS = False
 KEY_SPLIT = None
 
@@ -55,24 +53,24 @@ class Block:
         else:
             self.codeBlock = replacement(self.codeBlock)
 
-    def finalize(self):
+    def finalize(self, sortMinLevel, sortMaxLevel):
         if self.done:
             return
         self.done = True
         if not self.children or self.isHeader:
             return
         for kid in self.children:
-            kid.finalize()
+            kid.finalize(sortMinLevel, sortMaxLevel)
         if sortMinLevel <= self.nestedLevel + 1 <= sortMaxLevel:
             assert(self.children[-1])
             continuationChar = False
             match = continuationRegex.search(self.children[0].getEnd())
             if not continuationRegex.search(self.children[-1].getEnd()) and match:
-                self.children[-1].modifyLastEntry(lambda x : x.replace("\n", match.group(1)))
+                self.children[-1].modifyLastEntry(lambda x: x.replace("\n", match.group(1)))
                 continuationChar = 1
             self.children.sort()
             if continuationChar:
-                self.children[-1].modifyLastEntry(lambda x : continuationRegex.sub("\n", x))
+                self.children[-1].modifyLastEntry(lambda x: continuationRegex.sub("\n", x))
             assert(self.children[-1])
 
     def __str__(self):
@@ -91,16 +89,16 @@ class Block:
             for k in kid:
                 yield k
 
-    def process(self, line, indentLevel):
+    def process(self, line, indentLevel, sortMinLevel, sortMaxLevel):
         if self.done:
             return True
         if self.indentLevel >= indentLevel:
-            self.finalize()
+            self.finalize(sortMinLevel, sortMaxLevel)
             return True
         else:
             if self.children:
                 assert(self.children[-1])
-            if not self.children or self.children[-1].process(line, indentLevel):
+            if not self.children or self.children[-1].process(line, indentLevel, sortMinLevel, sortMaxLevel):
                 if self.children and self.children[-1].indentLevel == indentLevel:
                     if endingBlockRegex.match(line):
                         self.children[-1].footer += line
@@ -117,7 +115,7 @@ class Block:
         return False
 
 
-def indentSort():
+def indentSort(sortMinLevel=-1, sortMaxLevel=float("inf")):
     root = Block("", -1, -1)
     lastLevel = -1
     for i, line in enumerate(getInput()):
@@ -134,7 +132,7 @@ def indentSort():
                 lastLevel = indentLevel
         else:
             indentLevel = -1
-        root.process(line, indentLevel)
+        root.process(line, indentLevel, sortMinLevel, sortMaxLevel)
     return root
 
 
@@ -153,6 +151,9 @@ if __name__ == "__main__":
     namespace = parser.parse_args()
     KEY_SPLIT = namespace.key
     IGNORE_MODIFIERS = namespace.ignore_modifiers
+
+    sortMinLevel = -1
+    sortMaxLevel = float("inf")
     if namespace.range:
         parts = namespace.range.split("-")
         if parts:
@@ -164,5 +165,5 @@ if __name__ == "__main__":
                 if parts[1]:
                     sortMaxLevel = int(parts[1])
 
-    root = indentSort()
+    root = indentSort(sortMinLevel, sortMaxLevel)
     print(root, end="")
