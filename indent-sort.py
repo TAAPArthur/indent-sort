@@ -15,6 +15,7 @@ continuationRegex = re.compile(r"((,| \\)\n)$")
 
 class SortSettings:
     start_key = 0
+    end_key = None
     ignore_modifiers = False
     ignore_case = False
     sort_min_level = -1
@@ -22,6 +23,7 @@ class SortSettings:
 
     def __init__(self, key=0, ignore_modifiers=False, ignore_case=False, sort_range=""):
         self.start_key = key if isinstance(key, int) else int(key.split(",")[0])
+        self.end_key = None if isinstance(key, int) or "," not in key else int(key.split(",")[1])
         self.ignore_modifiers = ignore_modifiers
         self.ignore_case = ignore_case
 
@@ -40,7 +42,7 @@ class SortSettings:
 def getSortKey(key, settings):
     if settings.ignore_modifiers:
         key = modifiersRegex.sub("", key)
-    key = key.split()[settings.start_key:]
+    key = key.split()[settings.start_key:settings.end_key]
     if settings.ignore_case:
         key = key.lower()
     return key
