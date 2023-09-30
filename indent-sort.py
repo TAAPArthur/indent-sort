@@ -21,13 +21,15 @@ class SortSettings:
     sort_min_level = -1
     sort_max_level = float("inf")
     delimitor = None
+    numeric_sort = False
 
-    def __init__(self, key=0, ignore_modifiers=False, ignore_case=False, sort_range="", delimitor=None):
+    def __init__(self, key=0, ignore_modifiers=False, ignore_case=False, sort_range="", delimitor=None, numeric_sort=False):
         self.start_key = key if isinstance(key, int) else int(key.split(",")[0])
         self.end_key = None if isinstance(key, int) or "," not in key else int(key.split(",")[1])
         self.ignore_modifiers = ignore_modifiers
         self.ignore_case = ignore_case
         self.delimitor = delimitor
+        self.numeric_sort = numeric_sort
 
         if sort_range:
             parts = sort_range.split("-")
@@ -42,14 +44,34 @@ class SortSettings:
 
 
 class KeyWrapper:
+    key = None
+    keys = []
+
     def __init__(self, raw_string, settings):
         if settings.ignore_modifiers:
             raw_string = modifiersRegex.sub("", raw_string)
         if settings.ignore_case:
             raw_string = raw_string.lower()
-        self.key = (settings.delimitor or " ").join(raw_string.split(settings.delimitor)[settings.start_key:settings.end_key])
+        keys = raw_string.split(settings.delimitor)[settings.start_key:settings.end_key]
+        self.key = (settings.delimitor or " ").join(keys)
+        if settings.numeric_sort:
+            for i in range(len(keys)):
+                try:
+                    keys[i] = float(keys[i].strip())
+                    if keys[i] % 1 == 0:
+                        keys[i] = int(keys[i])
+                except ValueError:
+                    pass
+            self.keys = keys
 
     def __lt__(self, other):
+        try:
+            for i in range(min(len(self.keys), len(other.keys))):
+                if self.keys[i] == other.keys[i]:
+                    continue
+                return self.keys[i] < other.keys[i]
+        except TypeError:
+            pass
         return self.key < other.key
 
 
@@ -176,9 +198,10 @@ if __name__ == "__main__":
     parser.add_argument("-k", "--key", default=0, help="Skip the first N words when sorting")
     parser.add_argument("-i", "--ignore-case", default=False, action="store_const", const=True)
     parser.add_argument("-t", "--delim", default=None, action="store_const", const=True)
+    parser.add_argument("-n", "--numeric-sort", default=None, action="store_const", const=True)
     parser.add_argument("sort_range", default=None, nargs="?")
     namespace = parser.parse_args()
-    settings = SortSettings(key=namespace.key, ignore_case=namespace.ignore_case, ignore_modifiers=namespace.ignore_modifiers, sort_range=namespace.sort_range, delimitor=namespace.delim)
+    settings = SortSettings(key=namespace.key, ignore_case=namespace.ignore_case, ignore_modifiers=namespace.ignore_modifiers, sort_range=namespace.sort_range, delimitor=namespace.delim, numeric_sort=namespace.numeric_sort)
 
     root = indentSort(settings)
     print(root, end="")
