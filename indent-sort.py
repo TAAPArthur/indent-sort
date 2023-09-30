@@ -147,7 +147,7 @@ def indentSort(settings):
     lastLevel = -1
     for i, line in enumerate(getInput()):
         if i == 0 and line and line.startswith("#!"):
-            root = Block(line, -1, -1, settings)
+            root = Block("", -1, -1, settings, header=line)
             continue
         if line != None:
             trimmedLine = line.lstrip()

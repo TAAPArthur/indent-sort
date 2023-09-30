@@ -1,0 +1,9 @@
+#!/bin/sh -e
+
+bar() {
+    echo hi
+}
+
+foo() {
+    bar()
+}
