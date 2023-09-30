@@ -39,13 +39,16 @@ class SortSettings:
                         self.sort_max_level = int(parts[1])
 
 
-def getSortKey(key, settings):
-    if settings.ignore_modifiers:
-        key = modifiersRegex.sub("", key)
-    key = key.split()[settings.start_key:settings.end_key]
-    if settings.ignore_case:
-        key = key.lower()
-    return key
+class KeyWrapper:
+    def __init__(self, raw_string, settings):
+        if settings.ignore_modifiers:
+            raw_string = modifiersRegex.sub("", raw_string)
+        if settings.ignore_case:
+            raw_string = raw_string.lower()
+        self.key = raw_string.split()[settings.start_key:settings.end_key]
+
+    def __lt__(self, other):
+        return self.key < other.key
 
 
 class Block:
@@ -53,7 +56,7 @@ class Block:
     def __init__(self, codeBlock, indentLevel, nestedLevel, settings, header=""):
         self.codeBlock = codeBlock
         self.settings = settings
-        self.sortKey = getSortKey(codeBlock, settings)
+        self.sortKey = KeyWrapper(codeBlock, settings)
         self.indentLevel = indentLevel
         self.nestedLevel = nestedLevel
         self.children = []
