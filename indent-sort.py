@@ -20,12 +20,14 @@ class SortSettings:
     ignore_case = False
     sort_min_level = -1
     sort_max_level = float("inf")
+    delimitor = None
 
-    def __init__(self, key=0, ignore_modifiers=False, ignore_case=False, sort_range=""):
+    def __init__(self, key=0, ignore_modifiers=False, ignore_case=False, sort_range="", delimitor=None):
         self.start_key = key if isinstance(key, int) else int(key.split(",")[0])
         self.end_key = None if isinstance(key, int) or "," not in key else int(key.split(",")[1])
         self.ignore_modifiers = ignore_modifiers
         self.ignore_case = ignore_case
+        self.delimitor = delimitor
 
         if sort_range:
             parts = sort_range.split("-")
@@ -45,7 +47,7 @@ class KeyWrapper:
             raw_string = modifiersRegex.sub("", raw_string)
         if settings.ignore_case:
             raw_string = raw_string.lower()
-        self.key = raw_string.split()[settings.start_key:settings.end_key]
+        self.key = (settings.delimitor or " ").join(raw_string.split(settings.delimitor)[settings.start_key:settings.end_key])
 
     def __lt__(self, other):
         return self.key < other.key
@@ -173,9 +175,10 @@ if __name__ == "__main__":
     parser.add_argument("-m", "--ignore-modifiers", default=False, action="store_const", const=True)
     parser.add_argument("-k", "--key", default=0, help="Skip the first N words when sorting")
     parser.add_argument("-i", "--ignore-case", default=False, action="store_const", const=True)
+    parser.add_argument("-t", "--delim", default=None, action="store_const", const=True)
     parser.add_argument("sort_range", default=None, nargs="?")
     namespace = parser.parse_args()
-    settings = SortSettings(key=namespace.key, ignore_case=namespace.ignore_case, ignore_modifiers=namespace.ignore_modifiers, sort_range=namespace.sort_range)
+    settings = SortSettings(key=namespace.key, ignore_case=namespace.ignore_case, ignore_modifiers=namespace.ignore_modifiers, sort_range=namespace.sort_range, delimitor=namespace.delim)
 
     root = indentSort(settings)
     print(root, end="")
