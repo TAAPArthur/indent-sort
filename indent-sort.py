@@ -22,14 +22,16 @@ class SortSettings:
     sort_max_level = float("inf")
     delimitor = None
     numeric_sort = False
+    reverse = False
 
-    def __init__(self, key=0, ignore_modifiers=False, ignore_case=False, sort_range="", delimitor=None, numeric_sort=False):
+    def __init__(self, key=0, ignore_modifiers=False, ignore_case=False, sort_range="", delimitor=None, numeric_sort=False, reverse=False):
         self.start_key = key if isinstance(key, int) else int(key.split(",")[0])
         self.end_key = None if isinstance(key, int) or "," not in key else int(key.split(",")[1])
         self.ignore_modifiers = ignore_modifiers
         self.ignore_case = ignore_case
         self.delimitor = delimitor
         self.numeric_sort = numeric_sort
+        self.reverse = reverse
 
         if sort_range:
             parts = sort_range.split("-")
@@ -120,7 +122,7 @@ class Block:
             if not continuationRegex.search(self.children[-1].getEnd()) and match:
                 self.children[-1].modifyLastEntry(lambda x: x.replace("\n", match.group(1)))
                 continuationChar = 1
-            self.children.sort()
+            self.children.sort(reverse=self.settings.reverse)
             if continuationChar:
                 self.children[-1].modifyLastEntry(lambda x: continuationRegex.sub("\n", x))
             assert self.children[-1]
@@ -197,6 +199,7 @@ if __name__ == "__main__":
     parser.add_argument("-k", "--key", default=0, help="Skip the first N words when sorting")
     parser.add_argument("-m", "--ignore-modifiers", default=False, action="store_const", const=True)
     parser.add_argument("-n", "--numeric-sort", default=None, action="store_const", const=True)
+    parser.add_argument("-r", "--reverse", default=False, action="store_const", const=True)
     parser.add_argument("-t", "--delimitor", default=None, action="store_const", const=True)
     parser.add_argument("-v", "--version", action="version", version="1.1")
     parser.add_argument("sort_range", default=None, nargs="?")
