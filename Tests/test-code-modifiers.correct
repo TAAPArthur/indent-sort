@@ -1,4 +1,4 @@
-#!--ignore-modifiers
+#! --ignore-modifiers
 public class A(){
     public void method1();
     private void method2();

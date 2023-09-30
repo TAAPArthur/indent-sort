@@ -8,7 +8,7 @@ for file in *correct; do
     base=$(basename "$file" .correct)
     original="$base.orig"
     cmd="$(head -n1 "$original")"
-    if [ "${cmd#\#\!}" != "$cmd" ]; then
+    if [ "${cmd#\#\! }" != "$cmd" ]; then
         param="${cmd#\#\!}"
     else
         param="${base#test-partial-sort}"
