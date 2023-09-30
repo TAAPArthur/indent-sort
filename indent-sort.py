@@ -193,15 +193,15 @@ def indentSort(settings):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-v", "--version", action="version", version="1.1")
-    parser.add_argument("-m", "--ignore-modifiers", default=False, action="store_const", const=True)
-    parser.add_argument("-k", "--key", default=0, help="Skip the first N words when sorting")
     parser.add_argument("-i", "--ignore-case", default=False, action="store_const", const=True)
-    parser.add_argument("-t", "--delim", default=None, action="store_const", const=True)
+    parser.add_argument("-k", "--key", default=0, help="Skip the first N words when sorting")
+    parser.add_argument("-m", "--ignore-modifiers", default=False, action="store_const", const=True)
     parser.add_argument("-n", "--numeric-sort", default=None, action="store_const", const=True)
+    parser.add_argument("-t", "--delimitor", default=None, action="store_const", const=True)
+    parser.add_argument("-v", "--version", action="version", version="1.1")
     parser.add_argument("sort_range", default=None, nargs="?")
     namespace = parser.parse_args()
-    settings = SortSettings(key=namespace.key, ignore_case=namespace.ignore_case, ignore_modifiers=namespace.ignore_modifiers, sort_range=namespace.sort_range, delimitor=namespace.delim, numeric_sort=namespace.numeric_sort)
+    settings = SortSettings(**vars(namespace))
 
     root = indentSort(settings)
     print(root, end="")
